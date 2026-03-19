@@ -19,8 +19,17 @@ db.serialize(() => {
   )`);
 });
 
+// Sample Data Populate
 db.run(`INSERT INTO users (username, password, email, role, balance) VALUES ('admin', 'admin', 'admin@email.com', 'ADMIN', 9999)`);
+db.run(`INSERT INTO users (username, password, email, role, balance) VALUES ('user1', 'user1', 'user1@email.com', NULL, 324)`);
+db.run(`INSERT INTO users (username, password, email, role, balance) VALUES ('user2', 'user2', 'user2@email.com', NULL, 124)`);
+db.run(`INSERT INTO users (username, password, email, role, balance) VALUES ('user3', 'user3', 'user3@email.com', NULL, 354)`);
+
 db.run(`INSERT INTO posts (userId, comment) VALUES (1,'ADMIN MESSAGE')`);
+db.run(`INSERT INTO posts (userId, comment) VALUES (2,'Hey Guys :D')`);
+db.run(`INSERT INTO posts (userId, comment) VALUES (3,'Hello Guy')`);
+db.run(`INSERT INTO posts (userId, comment) VALUES (4,'How is everyone??')`);
+
 
 // Methods to export
 module.exports = {
@@ -39,8 +48,8 @@ module.exports = {
   // Create a new post
   createPost: (userId, comment) => {
     return new Promise((resolve, reject) => {
-      const query = `INSERT INTO posts (userId, comment) VALUES ('${userId}', '${comment})'`;
-      db.run(query, function(err) {
+      const query = `INSERT INTO posts (userId, comment) VALUES (?, ?)`;
+      db.run(query, [userId, comment],function(err) {
         if (err) reject(err);
         else resolve({ id: this.lastID });
       });

@@ -105,7 +105,4 @@ async function getPosts() {
             searchOutputElement.appendChild(a);
             }
     }
-    else {
-        alert('Login failed');
-    }
 }
