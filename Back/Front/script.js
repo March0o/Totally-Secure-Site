@@ -40,7 +40,7 @@ async function register() {
         // redirect to profile page with URL parameter
         window.location.href = `view-profile.html?id=${data.id}`;
     } else {
-        alert('Login failed');
+        alert('Register failed');
     }
 }
 
