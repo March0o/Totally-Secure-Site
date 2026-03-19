@@ -11,8 +11,7 @@ db.serialize(() => {
   )`);
 });
 
-// Insert user (⚠️ vulnerable)
-db.run(`INSERT INTO users (username, password) VALUES ('admin', 'admin')`);
+// db.run(`INSERT INTO users (username, password) VALUES ('admin', 'admin')`);
 
 // Methods to export
 module.exports = {

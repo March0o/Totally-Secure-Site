@@ -4,9 +4,15 @@ const dal = require('./dal');
 
 // Register
 router.post('/register', async (req, res) => {
-    await dal.createUser(req.username, req.password, req.email);
-    res.send("User registered");
-});
+    console.log(req.body);
+    let response = await dal.createUser(req.body.username, req.body.password, req.body.email);
+    console.log(response);
+    if (response) {
+        res.json(response);
+    } else {
+        res.status(401).json({error:"Invalid input"});
+    }
+    });
 
 // Login (vulnerable to injection)
 router.post('/login', async (req, res) => {
@@ -24,7 +30,7 @@ router.post('/login', async (req, res) => {
 router.get('/user', async (req, res) => {
     const id = req.query.id;
 
-    const user = await User.findById(id);
+    const user = await dal.getUserById(id)
     res.json(user); // ⚠️ no auth check
 });
 
