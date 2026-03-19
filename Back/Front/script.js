@@ -97,7 +97,7 @@ async function getPosts() {
     if (res.ok) {
         searchOutputElement.innerHTML = ``;
         if (data.length == 0) {
-            searchOutputElement.innerHTML = `No Results`;
+            searchOutputElement.innerHTML = `No Results for ${searchElement.value}`;
         }
         for (let i = 0; i < data.length; i++) {
             const a = document.createElement("li");
