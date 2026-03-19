@@ -44,11 +44,10 @@ async function register() {
     }
 }
 
-
-
 async function profileView() {
     const emailElement = document.getElementById('username-output');
     const usernameElement = document.getElementById('email-output');
+    const balanceElement = document.getElementById('balance-output');
 
     const params = new URLSearchParams(window.location.search);
     const userId = params.get('id');
@@ -59,8 +58,51 @@ async function profileView() {
     console.log(data)
     if (res.ok) {
         emailElement.innerText = data.email;
-        usernameElement.innerText = data.username
+        usernameElement.innerText = data.username;
+        balanceElement.innerText = '€' + data.balance;
     } else {
+        alert('Login failed');
+    }
+}
+
+async function createPost() {
+    const commentElement = document.getElementById('comment-input');
+
+    const params = new URLSearchParams(window.location.search);
+    const userId = params.get('id');
+
+    const res = await fetch('/api/posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            userId: userId,
+            comment: commentElement.value
+        })
+    })
+    if (res.ok) {
+        alert('Post Made!')
+    } else {
+        alert('Login failed');
+    }
+}
+
+async function getPosts() {
+    const searchElement = document.getElementById('search-input');
+    const searchOutputElement = document.getElementById('search-output');
+
+    const res = await fetch('/api/posts?query=' + searchElement.value)
+    const data = await res.json();
+
+    console.log(data);
+    if (res.ok) {
+        searchOutputElement.innerHTML = ``;
+        for (let i = 0; i < data.length; i++) {
+            const a = document.createElement("li");
+            a.innerHTML = `<p>${data[i].comment}</p>`;
+            searchOutputElement.appendChild(a);
+            }
+    }
+    else {
         alert('Login failed');
     }
 }
