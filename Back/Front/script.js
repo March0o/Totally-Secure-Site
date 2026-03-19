@@ -96,6 +96,9 @@ async function getPosts() {
     console.log(data);
     if (res.ok) {
         searchOutputElement.innerHTML = ``;
+        if (data.length == 0) {
+            searchOutputElement.innerHTML = `No Results`;
+        }
         for (let i = 0; i < data.length; i++) {
             const a = document.createElement("li");
             a.innerHTML = `<p>${data[i].comment}</p>`;
