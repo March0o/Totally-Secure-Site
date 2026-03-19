@@ -1,29 +1,22 @@
 const express = require('express');
 const router = express.Router();
+const dal = require('./dal');
 
 // Register
 router.post('/register', async (req, res) => {
-    const { username, password, email } = req.body;
-
-    const user = new User({ username, password, email });
-    await user.save();
-
+    await dal.createUser(req.username, req.password, req.email);
     res.send("User registered");
 });
 
 // Login (vulnerable to injection)
 router.post('/login', async (req, res) => {
-    const { username, password } = req.body;
-
-    const user = await User.findOne({
-        username: username,
-        password: password
-    });
+    console.log(req.body);
+    let user = await dal.findUser(req.body.username, req.body.password)
 
     if (user) {
         res.json(user); // ⚠️ returns full user object
     } else {
-        res.status(401).send("Invalid credentials");
+        res.status(401).json({error:"Invalid credentials"});
     }
 });
 

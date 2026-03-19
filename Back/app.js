@@ -2,6 +2,7 @@ const express = require('express');
 
 const app = express();
 
+app.use(express.json());           // parse JSON bodies
 app.use(express.static('./Front')) // Host Front
 
 // Routes
