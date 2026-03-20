@@ -1,11 +1,15 @@
 const express = require('express');
 const router = express.Router();
+const argon2 = require("argon2");
 const dal = require('./dal');
 
 // Register
 router.post('/register', async (req, res) => {
     console.log(req.body);
-    let response = await dal.createUser(req.body.username, req.body.password, req.body.email);
+    const passwordHash = await argon2.hash(req.body.password, {
+        type: argon2.argon2id
+    });
+    let response = await dal.createUser(req.body.username, passwordHash, req.body.email);
     console.log(response);
     if (response) {
         res.json(response);
@@ -27,20 +31,21 @@ router.post('/register/check', async (req, res) => {
 
 // Login
 router.post('/login', async (req, res) => {
-    console.log(req.body);
-    let user = await dal.findUser(req.body.username, req.body.password)
-
-    if (user) {
-        const sessionId = await dal.logSession(user.id);
-        res.cookie('sessionId', sessionId, {
-            httpOnly: true,
-            secure: false, // true in production (HTTPS)
-            sameSite: 'lax'
-        });
-        res.json(user);
-    } else {
-        res.status(401).json({error:"Invalid credentials"});
+    let user = await dal.findUser(req.body.username)
+    if (!user) {
+      return res.status(401).json({ error: "Invalid credentials" });
     }
+    const isValid = await argon2.verify(user.password, req.body.password);
+    if (!isValid) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+    const sessionId = await dal.logSession(user.id);
+    res.cookie('sessionId', sessionId, {
+        httpOnly: true,
+        secure: false, // true in production (HTTPS)
+        sameSite: 'lax'
+    });
+    res.json(user);
 });
 
 // Post Comment
