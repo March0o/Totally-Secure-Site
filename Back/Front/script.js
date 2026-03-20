@@ -1,3 +1,7 @@
+const loginBtn = document.getElementById('loginBtn');
+if (loginBtn) {
+  loginBtn.addEventListener('click', login);
+}
 async function login() {
     let usernameElement = document.getElementById('username-input');
     let passwordElement = document.getElementById('password-input');
@@ -20,6 +24,10 @@ async function login() {
     }
 } 
 
+const registerBtn = document.getElementById('registerBtn');
+if (registerBtn) {
+  registerBtn.addEventListener('click', register);
+}
 async function register() {
     let usernameElement = document.getElementById('new-username-input');
     let passwordElement = document.getElementById('new-password-input');
@@ -53,12 +61,16 @@ async function register() {
     const data = await res.json();
     if (res.ok) {
         // redirect to profile page with URL parameter
-        window.location.href = `view-profile.html?id=${data.id}`;
+        window.location.href = `login.html`;
     } else {
         alert('Register failed');
     }
 }
 
+const profileViewBtn = document.getElementById('profileViewBtn');
+if (profileViewBtn) {
+  profileViewBtn.addEventListener('click', profileView);
+}
 async function profileView() {
     const emailElement = document.getElementById('username-output');
     const usernameElement = document.getElementById('email-output');
@@ -78,7 +90,16 @@ async function profileView() {
         alert('Login failed');
     }
 }
+// run automatically on the profile page
+const usernameOutput = document.getElementById('username-output');
+if (usernameOutput) {
+  profileView();
+}
 
+const createPostBtn = document.getElementById('createPostBtn');
+if (createPostBtn) {
+  createPostBtn.addEventListener('click', createPost);
+}
 async function createPost() {
     const commentElement = document.getElementById('comment-input');
 
@@ -100,6 +121,10 @@ async function createPost() {
     }
 }
 
+const getPostsBtn = document.getElementById('getPostsBtn');
+if (getPostsBtn) {
+  getPostsBtn.addEventListener('click', getPosts);
+}
 async function getPosts() {
     const searchElement = document.getElementById('search-input');
     const searchOutputElement = document.getElementById('search-output');
@@ -121,6 +146,10 @@ async function getPosts() {
     }
 }
 
+const logoutBtn = document.getElementById('logoutBtn');
+if (logoutBtn) {
+  logoutBtn.addEventListener('click', logout);
+}
 async function logout() {
     await fetch('/api/user/logout', {
     method: 'POST',
