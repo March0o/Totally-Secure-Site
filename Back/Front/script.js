@@ -14,7 +14,7 @@ async function login() {
     const data = await res.json();
     if (res.ok) {
         // redirect to profile page with URL parameter
-        window.location.href = `view-profile.html?id=${data.id}`;
+        window.location.href = `view-profile.html`;
     } else {
         alert('Login failed');
     }
@@ -24,6 +24,21 @@ async function register() {
     let usernameElement = document.getElementById('new-username-input');
     let passwordElement = document.getElementById('new-password-input');
     let emailElement = document.getElementById('new-email-input');
+
+    const checkRes = await fetch('/api/register/check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            username: usernameElement.value,
+            email: emailElement.value
+        })
+    })
+    const checkData = await checkRes.json();
+    console.log(checkData);
+    if (checkData === true) {
+        alert('Register failed: Email or Username in use');
+        return;
+    }
 
     const res = await fetch('/api/register', {
         method: 'POST',
@@ -49,10 +64,9 @@ async function profileView() {
     const usernameElement = document.getElementById('email-output');
     const balanceElement = document.getElementById('balance-output');
 
-    const params = new URLSearchParams(window.location.search);
-    const userId = params.get('id');
-
-    const res = await fetch('/api/user?id=' + userId)
+    const res = await fetch('/api/user', {
+        credentials:'include'
+    })
 
     const data = await res.json();
     console.log(data)
@@ -95,14 +109,22 @@ async function getPosts() {
 
     console.log(data);
     if (res.ok) {
-        searchOutputElement.innerHTML = ``;
+        searchOutputElement.innerText = ``;
         if (data.length == 0) {
-            searchOutputElement.innerHTML = `No Results for ${searchElement.value}`;
+            searchOutputElement.innerText = `No Results for ${searchElement.value}`;
         }
         for (let i = 0; i < data.length; i++) {
             const a = document.createElement("li");
-            a.innerHTML = `<p>${data[i].comment}</p>`;
+            a.innerText = `${data[i].comment}`;
             searchOutputElement.appendChild(a);
             }
     }
+}
+
+async function logout() {
+    await fetch('/api/user/logout', {
+    method: 'POST',
+    credentials: 'include'
+    });
+    window.location.href = 'login.html';
 }

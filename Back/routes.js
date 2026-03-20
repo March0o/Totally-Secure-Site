@@ -14,12 +14,29 @@ router.post('/register', async (req, res) => {
     }
     });
 
+router.post('/register/check', async (req, res) => {
+    console.log(req.body);
+    let response = await dal.checkAccount(req.body.email, req.body.username);
+    console.log(response);
+    if (response == true | response == false) {
+        res.json(response);
+    } else {
+        res.status(401).json({error:"Invalid input"});
+    }
+});
+
 // Login
 router.post('/login', async (req, res) => {
     console.log(req.body);
     let user = await dal.findUser(req.body.username, req.body.password)
 
     if (user) {
+        const sessionId = await dal.logSession(user.id);
+        res.cookie('sessionId', sessionId, {
+            httpOnly: true,
+            secure: false, // true in production (HTTPS)
+            sameSite: 'lax'
+        });
         res.json(user);
     } else {
         res.status(401).json({error:"Invalid credentials"});
@@ -46,9 +63,34 @@ router.get('/posts', async (req, res) => {
 
 // Get user by ID
 router.get('/user', async (req, res) => {
-    const id = req.query.id;
-    const user = await dal.getUserById(id)
+    const sessionId = req.cookies.sessionId;
+
+    if (!sessionId) {
+        return res.status(401).json({ error: 'Not logged in' });
+    }
+
+    const session = await dal.getSession(sessionId);
+
+    if (!session) {
+        return res.status(401).json({ error: 'Invalid session' });
+    }
+
+    if (session.expiresAt < Math.floor(Date.now() / 1000)) {
+        return res.status(401).json({ error: 'Session expired' });
+    }
+
+    const user = await dal.getUserById(session.userId)
     res.json(user);
+});
+
+// Logout
+router.post('/user/logout', async (req, res) => {
+    res.clearCookie('sessionId', {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: false // true in production
+    });
+    res.json({ success: true });
 });
 
 module.exports = router;
