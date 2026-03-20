@@ -5,12 +5,13 @@ const dal = require('./dal');
 
 // Register
 router.post('/register', async (req, res) => {
-    console.log(req.body);
+    // Hash Password
     const passwordHash = await argon2.hash(req.body.password, {
         type: argon2.argon2id
     });
+    // Create User in DB
     let response = await dal.createUser(req.body.username, passwordHash, req.body.email);
-    console.log(response);
+    // Output
     if (response) {
         res.json(response);
     } else {
@@ -18,10 +19,11 @@ router.post('/register', async (req, res) => {
     }
     });
 
+// Register - Check if user exists
 router.post('/register/check', async (req, res) => {
-    console.log(req.body);
+    // Check if account exists in DB
     let response = await dal.checkAccount(req.body.email, req.body.username);
-    console.log(response);
+    // Output
     if (response == true | response == false) {
         res.json(response);
     } else {
@@ -31,14 +33,17 @@ router.post('/register/check', async (req, res) => {
 
 // Login
 router.post('/login', async (req, res) => {
+    // Find user by username in DB
     let user = await dal.findUser(req.body.username)
     if (!user) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
+    // Check password validity 
     const isValid = await argon2.verify(user.password, req.body.password);
     if (!isValid) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
+    // Create new login session
     const sessionId = await dal.logSession(user.id);
     res.cookie('sessionId', sessionId, {
         httpOnly: true,
@@ -50,9 +55,9 @@ router.post('/login', async (req, res) => {
 
 // Post Comment
 router.post('/posts', async (req, res) => {
-    console.log(req.body);
+    // Create new post in DB
     let post = await dal.createPost(req.body.username, req.body.comment)
-
+    // Output
     if (post) {
         res.json(post);
     } else {
@@ -61,40 +66,42 @@ router.post('/posts', async (req, res) => {
 });
 
 router.get('/posts', async (req, res) => {
-    const query = req.query.query;
-    const posts = await dal.getPosts(query)
+    // Get Posts in DB
+    const posts = await dal.getPosts(req.query.query)
+    // Output
     res.json(posts);
 });
 
 // Get user by ID
 router.get('/user', async (req, res) => {
+    // Get Session From DB
     const sessionId = req.cookies.sessionId;
-
     if (!sessionId) {
         return res.status(401).json({ error: 'Not logged in' });
     }
-
     const session = await dal.getSession(sessionId);
-
+    // Check session validity
     if (!session) {
         return res.status(401).json({ error: 'Invalid session' });
     }
-
     if (session.expiresAt < Math.floor(Date.now() / 1000)) {
         return res.status(401).json({ error: 'Session expired' });
     }
-
+    // Get User from DB after successful check
     const user = await dal.getUserById(session.userId)
+    // Output
     res.json(user);
 });
 
 // Logout
 router.post('/user/logout', async (req, res) => {
+    // Clear cookies
     res.clearCookie('sessionId', {
         httpOnly: true,
         sameSite: 'lax',
         secure: false // true in production
     });
+    // Output
     res.json({ success: true });
 });
 

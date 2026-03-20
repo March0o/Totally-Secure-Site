@@ -11,6 +11,7 @@ async function init() {
   const user3PasswordHash = await argon2.hash('user3', { type: argon2.argon2id });
 
   db.serialize(() => {
+    // User Table
     db.run(`CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       username TEXT,
@@ -20,12 +21,14 @@ async function init() {
       balance REAL
     )`);
 
+    // Post Table
     db.run(`CREATE TABLE IF NOT EXISTS posts (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       userId INTEGER,
       comment TEXT
     )`);
 
+    // Session Table
     db.run(`CREATE TABLE IF NOT EXISTS sessions (
       id INTEGER TEXT PRIMARY KEY,
       userId INTEGER,
@@ -38,11 +41,13 @@ async function init() {
 }
 
 function populateDB(adminPasswordHash, user1PasswordHash, user2PasswordHash, user3PasswordHash) {
+  // Sample Users
   db.run(`INSERT INTO users (username, password, email, role, balance) VALUES ('admin', ?, 'admin@email.com', 'ADMIN', 9999)`, [adminPasswordHash]);
   db.run(`INSERT INTO users (username, password, email, role, balance) VALUES ('user1', ?, 'user1@email.com', NULL, 324)`, [user1PasswordHash]);
   db.run(`INSERT INTO users (username, password, email, role, balance) VALUES ('user2', ?, 'user2@email.com', NULL, 124)`, [user2PasswordHash]);
   db.run(`INSERT INTO users (username, password, email, role, balance) VALUES ('user3', ?, 'user3@email.com', NULL, 354)`, [user3PasswordHash]);
 
+  // Sample Posts
   db.run(`INSERT INTO posts (userId, comment) VALUES (1,'ADMIN MESSAGE')`);
   db.run(`INSERT INTO posts (userId, comment) VALUES (2,'Hey Guys :D')`);
   db.run(`INSERT INTO posts (userId, comment) VALUES (3,'Hello Guy')`);
@@ -108,7 +113,7 @@ module.exports = {
     });
   },
 
-  // Get Posts (login)
+  // Get Posts
   getPosts: (search) => {
     return new Promise((resolve, reject) => {
       const query = `SELECT * FROM posts WHERE comment LIKE ?`;
@@ -119,6 +124,7 @@ module.exports = {
     });
   },
 
+  // Create new/log session
   logSession: (userId) => {
     return new Promise((resolve, reject) => {
       const sessionId = crypto.randomBytes(32).toString('hex');
@@ -134,6 +140,7 @@ module.exports = {
     });
   },
 
+  // Get Session information
   getSession: (sessionId) => {
     return new Promise((resolve, reject) => {
       const query = `SELECT id, userId, createdAt, expiresAt FROM sessions WHERE id = ?`;

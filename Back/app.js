@@ -1,13 +1,22 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
+const rateLimit = require("express-rate-limit");
 
 const app = express();
 
 app.disable('x-powered-by'); // As suggested by ZAP
 
+// Rate limting
+const limiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 20,
+});
+
+app.use(limiter);
 app.use(express.json());           // parse JSON bodies
 app.use(cookieParser());           // Allow Cookies
 
+// Header Options
 app.use((req, res, next) => {
   res.setHeader(
     "Content-Security-Policy",
